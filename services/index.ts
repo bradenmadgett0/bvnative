@@ -52,3 +52,24 @@ export const fetchCart = async (): Promise<Cart> => {
 
   return await resp.json();
 };
+
+export const addItemToCart = async (itemId: number) => {
+  const resp = await fetch('http://127.0.0.1:8000/api/cart/', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic ' + btoa('test:test'),
+    },
+    body: JSON.stringify({
+      item: itemId,
+    }),
+  });
+
+  console.log(resp);
+  if (!resp?.ok) {
+    throw new Error('Something went wrong!');
+  }
+
+  return await resp.json();
+};

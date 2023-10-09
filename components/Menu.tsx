@@ -1,9 +1,8 @@
 import React from 'react';
 import {FlatList, Text} from 'react-native';
-import {useQuery} from 'react-query';
-import {fetchMenuItems, MenuItem} from '../services';
+import {useMutation, useQuery, useQueryClient} from 'react-query';
+import {addItemToCart, fetchMenuItems, MenuItem} from '../services';
 import styled from '@emotion/native';
-import InfoBar from './InfoBar';
 
 const MenuContainer = styled.View({
   paddingHorizontal: 16,
@@ -29,9 +28,15 @@ const MenuItemDescription = styled.Text({
   fontSize: 14,
 });
 
-const Item = ({item}: {item: MenuItem}): JSX.Element => {
+const Item = ({
+  item,
+  onPress,
+}: {
+  item: MenuItem;
+  onPress: () => void;
+}): JSX.Element => {
   return (
-    <MenuItemContainer>
+    <MenuItemContainer onPress={() => onPress()}>
       <MenuTitleBar>
         <MenuTitle>{item.title}</MenuTitle>
         <MenuTitle>{`$${item.price}`}</MenuTitle>
@@ -47,13 +52,27 @@ const Menu = (): JSX.Element => {
     () => fetchMenuItems(),
   );
 
+  const queryClient = useQueryClient();
+
+  const addItemMutation = useMutation(
+    (itemId: number) => addItemToCart(itemId),
+    {
+      onSuccess: () => queryClient.invalidateQueries('CART'),
+    },
+  );
+
   return (
     <MenuContainer>
       {menuItemsLoading ?? <Text>Loading...</Text>}
       {menuItems?.length ? (
         <FlatList
           data={menuItems}
-          renderItem={menuItem => <Item item={menuItem.item} />}
+          renderItem={menuItem => (
+            <Item
+              item={menuItem.item}
+              onPress={() => addItemMutation.mutate(menuItem.item.id)}
+            />
+          )}
         />
       ) : (
         <Text>No menu items</Text>
