@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from '@emotion/native';
-import {useQuery} from 'react-query';
-import {fetchCart} from '../services';
-import {FlatList, Text} from 'react-native';
+import {useMutation, useQuery, useQueryClient} from 'react-query';
+import {fetchCart, placeOrder} from '../services';
+import {Alert, FlatList, Text, TouchableOpacity} from 'react-native';
 import HeaderBar from './common/HeaderBar';
 
 const CartDetailsPage = styled.View({
@@ -27,10 +27,34 @@ const CartTotalLabel = styled.Text({
   fontWeight: 'bold',
 });
 
+const OrderButton = styled.TouchableOpacity({
+  alignSelf: 'center',
+  marginTop: 16,
+});
+
+const OrderButtonLabel = styled.Text({
+  fontSize: 18,
+  fontWeight: 'bold',
+  color: 'green',
+});
+
+const NoItemsLabel = styled.Text({
+  padding: 8,
+});
+
 const CartDetails = (): JSX.Element => {
   const {data: cartData, isLoading: cartLoading} = useQuery('CART', () =>
     fetchCart(),
   );
+
+  const queryClient = useQueryClient();
+
+  const placeOrderMutation = useMutation(() => placeOrder(), {
+    onSuccess: () => {
+      queryClient.invalidateQueries('CART');
+      Alert.alert('Order successfully placed!');
+    },
+  });
 
   return (
     <>
@@ -48,17 +72,22 @@ const CartDetails = (): JSX.Element => {
         )}
 
         {!cartLoading && cartData?.cart_items?.length ? (
-          <FlatList
-            data={cartData.cart_items}
-            renderItem={cartItem => (
-              <CartItem>
-                <Text>{cartItem.item.item.title}</Text>
-                <Text>{`${cartItem.item.item.price} x ${cartItem.item.quantity}`}</Text>
-              </CartItem>
-            )}
-          />
+          <>
+            <FlatList
+              data={cartData.cart_items}
+              renderItem={cartItem => (
+                <CartItem>
+                  <Text>{cartItem.item.item.title}</Text>
+                  <Text>{`${cartItem.item.item.price} x ${cartItem.item.quantity}`}</Text>
+                </CartItem>
+              )}
+            />
+            <OrderButton onPress={() => placeOrderMutation.mutate()}>
+              <OrderButtonLabel>Place order</OrderButtonLabel>
+            </OrderButton>
+          </>
         ) : (
-          <Text>No items</Text>
+          <NoItemsLabel>No items</NoItemsLabel>
         )}
       </CartDetailsPage>
     </>
