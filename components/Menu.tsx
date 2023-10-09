@@ -1,10 +1,44 @@
 import React from 'react';
-import {View, FlatList, Text} from 'react-native';
+import {FlatList, Text} from 'react-native';
 import {useQuery} from 'react-query';
 import {fetchMenuItems, MenuItem} from '../services';
+import styled from '@emotion/native';
+import InfoBar from './InfoBar';
+
+const MenuContainer = styled.View({
+  paddingHorizontal: 16,
+});
+
+const MenuItemContainer = styled.TouchableOpacity({
+  margin: 8,
+  padding: 8,
+});
+
+const MenuTitleBar = styled.View({
+  justifyContent: 'space-between',
+  flexDirection: 'row',
+  marginBottom: 4,
+});
+
+const MenuTitle = styled.Text({
+  fontSize: 18,
+  fontWeight: 'bold',
+});
+
+const MenuItemDescription = styled.Text({
+  fontSize: 14,
+});
 
 const Item = ({item}: {item: MenuItem}): JSX.Element => {
-  return <Text>{item.title}</Text>;
+  return (
+    <MenuItemContainer>
+      <MenuTitleBar>
+        <MenuTitle>{item.title}</MenuTitle>
+        <MenuTitle>{`$${item.price}`}</MenuTitle>
+      </MenuTitleBar>
+      <MenuItemDescription>{item.description}</MenuItemDescription>
+    </MenuItemContainer>
+  );
 };
 
 const Menu = (): JSX.Element => {
@@ -13,10 +47,8 @@ const Menu = (): JSX.Element => {
     () => fetchMenuItems(),
   );
 
-  console.log(menuItemsLoading);
-
   return (
-    <View style={{padding: 16}}>
+    <MenuContainer>
       {menuItemsLoading ?? <Text>Loading...</Text>}
       {menuItems?.length ? (
         <FlatList
@@ -26,7 +58,7 @@ const Menu = (): JSX.Element => {
       ) : (
         <Text>No menu items</Text>
       )}
-    </View>
+    </MenuContainer>
   );
 };
 
