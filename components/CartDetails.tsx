@@ -76,7 +76,6 @@ const CartDetails = (): JSX.Element => {
     isFetching: cartFetching,
   } = useQuery('CART', () => fetchCart(), {
     onError: e => {
-      console.log(e);
       Alert.alert('Something went wrong!');
     },
   });
@@ -89,7 +88,6 @@ const CartDetails = (): JSX.Element => {
       Alert.alert('Order successfully placed!');
     },
     onError: e => {
-      console.log(e);
       Alert.alert('Something went wrong!');
     },
   });
