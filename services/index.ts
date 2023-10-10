@@ -51,7 +51,6 @@ export const fetchCart = async (): Promise<Cart> => {
     },
   });
 
-  console.log(resp);
   if (!resp?.ok) {
     throw new Error('Something went wrong!');
   }
@@ -72,7 +71,6 @@ export const addItemToCart = async (itemId: number) => {
     }),
   });
 
-  console.log(resp);
   if (!resp?.ok) {
     throw new Error('Something went wrong!');
   }
@@ -90,7 +88,6 @@ export const placeOrder = async () => {
     },
   });
 
-  console.log(resp);
   if (!resp?.ok) {
     throw new Error('Something went wrong!');
   }
@@ -108,10 +105,32 @@ export const getOrders = async (): Promise<Order[]> => {
     },
   });
 
-  console.log(resp);
   if (!resp?.ok) {
     throw new Error('Something went wrong!');
   }
 
   return await resp.json();
+};
+
+export const login = async (
+  username: string,
+  password: string,
+): Promise<boolean> => {
+  const resp = await fetch('http://127.0.0.1:8000/api/login/', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      username: username,
+      password: password,
+    }),
+  });
+
+  if (!resp?.ok) {
+    throw new Error('Something went wrong!');
+  }
+
+  return Promise.resolve(true);
 };
