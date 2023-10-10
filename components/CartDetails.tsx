@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from '@emotion/native';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
-import {fetchCart, placeOrder} from '../services';
-import {Alert, FlatList, Text, TouchableOpacity} from 'react-native';
+import {Cart, fetchCart, placeOrder} from '../services';
+import {Alert, FlatList, Text} from 'react-native';
 import HeaderBar from './common/HeaderBar';
+import {useNavigation} from '@react-navigation/native';
 
 const CartDetailsPage = styled.View({
   paddingHorizontal: 16,
@@ -42,10 +43,43 @@ const NoItemsLabel = styled.Text({
   padding: 8,
 });
 
-const CartDetails = (): JSX.Element => {
-  const {data: cartData, isLoading: cartLoading} = useQuery('CART', () =>
-    fetchCart(),
+export const CartItems = ({cart}: {cart?: Cart}): JSX.Element => {
+  return (
+    <>
+      <CartTotal>
+        <Text>Total</Text>
+        <CartTotalLabel>
+          {cart?.total ? `$${cart.total}` : '$0.00'}
+        </CartTotalLabel>
+      </CartTotal>
+      {cart?.cart_items?.length ? (
+        <FlatList
+          data={cart?.cart_items}
+          renderItem={cartItem => (
+            <CartItem>
+              <Text>{cartItem.item.item.title}</Text>
+              <Text>{`${cartItem.item.item.price} x ${cartItem.item.quantity}`}</Text>
+            </CartItem>
+          )}
+        />
+      ) : (
+        <NoItemsLabel>No items</NoItemsLabel>
+      )}
+    </>
   );
+};
+
+const CartDetails = (): JSX.Element => {
+  const {
+    data: cartData,
+    isLoading: cartLoading,
+    isFetching: cartFetching,
+  } = useQuery('CART', () => fetchCart(), {
+    onError: e => {
+      console.log(e);
+      Alert.alert('Something went wrong!');
+    },
+  });
 
   const queryClient = useQueryClient();
 
@@ -54,40 +88,35 @@ const CartDetails = (): JSX.Element => {
       queryClient.invalidateQueries('CART');
       Alert.alert('Order successfully placed!');
     },
+    onError: e => {
+      console.log(e);
+      Alert.alert('Something went wrong!');
+    },
   });
+
+  const navigation = useNavigation();
 
   return (
     <>
-      <HeaderBar withBack title="Cart" />
+      <HeaderBar
+        withBack
+        title="Cart"
+        // @ts-ignore
+        action={() => navigation.navigate('Orders')}
+        actionLabel="Orders"
+      />
       <CartDetailsPage>
-        {cartLoading ? (
+        {cartLoading || cartFetching ? (
           <Text>Loading...</Text>
         ) : (
-          <CartTotal>
-            <Text>Total</Text>
-            <CartTotalLabel>
-              {cartData?.total ? `$${cartData.total}` : '$0.00'}
-            </CartTotalLabel>
-          </CartTotal>
-        )}
-
-        {!cartLoading && cartData?.cart_items?.length ? (
           <>
-            <FlatList
-              data={cartData.cart_items}
-              renderItem={cartItem => (
-                <CartItem>
-                  <Text>{cartItem.item.item.title}</Text>
-                  <Text>{`${cartItem.item.item.price} x ${cartItem.item.quantity}`}</Text>
-                </CartItem>
-              )}
-            />
-            <OrderButton onPress={() => placeOrderMutation.mutate()}>
-              <OrderButtonLabel>Place order</OrderButtonLabel>
-            </OrderButton>
+            <CartItems cart={cartData} />
+            {cartData?.cart_items?.length ? (
+              <OrderButton onPress={() => placeOrderMutation.mutate()}>
+                <OrderButtonLabel>Place order</OrderButtonLabel>
+              </OrderButton>
+            ) : null}
           </>
-        ) : (
-          <NoItemsLabel>No items</NoItemsLabel>
         )}
       </CartDetailsPage>
     </>

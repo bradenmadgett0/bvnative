@@ -2,10 +2,15 @@ import React, {useMemo} from 'react';
 import {useQuery} from 'react-query';
 import {fetchCart} from '../services';
 import HeaderBar from './common/HeaderBar';
+import {Alert} from 'react-native';
 
 const InfoBar = ({goToCart}: {goToCart: () => void}): JSX.Element => {
-  const {data: cartData, isLoading: cartLoading} = useQuery('CART', () =>
-    fetchCart(),
+  const {data: cartData, isLoading: cartLoading} = useQuery(
+    'CART',
+    () => fetchCart(),
+    {
+      onError: e => Alert.alert('Something went wrong!'),
+    },
   );
 
   const quantity = useMemo(() => {

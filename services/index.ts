@@ -19,6 +19,12 @@ export interface Cart {
   cart_items: CartItem[];
 }
 
+export interface Order {
+  id: number;
+  owner: number;
+  cart: Cart;
+}
+
 export const fetchMenuItems = async (): Promise<MenuItem[]> => {
   const resp = await fetch('http://127.0.0.1:8000/api/menu', {
     method: 'GET',
@@ -77,6 +83,24 @@ export const addItemToCart = async (itemId: number) => {
 export const placeOrder = async () => {
   const resp = await fetch('http://127.0.0.1:8000/api/orders/', {
     method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Basic ' + btoa('test:test'),
+    },
+  });
+
+  console.log(resp);
+  if (!resp?.ok) {
+    throw new Error('Something went wrong!');
+  }
+
+  return await resp.json();
+};
+
+export const getOrders = async (): Promise<Order[]> => {
+  const resp = await fetch('http://127.0.0.1:8000/api/orders/', {
+    method: 'GET',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 import React from 'react';
-import {FlatList, Text} from 'react-native';
+import {Alert, FlatList, Text} from 'react-native';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
 import {addItemToCart, fetchMenuItems, MenuItem} from '../services';
 import styled from '@emotion/native';
@@ -50,6 +50,9 @@ const Menu = (): JSX.Element => {
   const {data: menuItems, isLoading: menuItemsLoading} = useQuery(
     'MENU_ITEMS',
     () => fetchMenuItems(),
+    {
+      onError: e => Alert.alert('Something went wrong!'),
+    },
   );
 
   const queryClient = useQueryClient();

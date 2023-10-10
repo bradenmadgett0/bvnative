@@ -12,10 +12,17 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Home from './components/Home';
 import CartDetails from './components/CartDetails';
+import OrderHistory from './components/OrderHistory';
+import {Cart} from './services';
+import OrderDetail from './components/OrderDetail';
 
 export type RootStackParamList = {
   Home: undefined;
   Cart: undefined;
+  Orders: undefined;
+  OrderDetail: {
+    cart: Cart;
+  };
 };
 
 function App(): JSX.Element {
@@ -37,6 +44,16 @@ function App(): JSX.Element {
           <Stack.Screen
             name="Cart"
             component={CartDetails}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Orders"
+            component={OrderHistory}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="OrderDetail"
+            component={OrderDetail}
             options={{headerShown: false}}
           />
         </Stack.Navigator>
